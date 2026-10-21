@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#264b3f">
+<title>Tag to Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one narrow column of three stacked step cards, built for a phone held in a warehouse aisle. */
+:root {
+  --bg: #f5f6f2;
+  --card: #ffffff;
+  --ink: #1d3b31;
+  --muted: #66756e;
+  --line: #dfe5df;
+  --soft: #edf2ee;
+  --btn-bg: #264b3f;
+  --btn-fg: #ffffff;
+  --btn-off: #95a7a0;
+  --lime: #e9f5b5;
+  --lime-ink: #2f4a12;
+  --field: #fbfcfa;
+  --good-bg: #dff1e3; --good-fg: #1c5a34;
+  --new-bg: #fdf0c8; --new-fg: #6b4e00;
+  --bad: #a32a2a;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1b16; --card: #15271f; --ink: #e6efe8; --muted: #93a79c; --line: #263f35; --soft: #1c3329;
+    --btn-bg: #d6ef7a; --btn-fg: #14301f; --btn-off: #3b574b; --lime: #d6ef7a; --lime-ink: #14301f;
+    --field: #112019; --good-bg: #1d4a30; --good-fg: #b9ecc9; --new-bg: #4a3b0c; --new-fg: #f4dd8c; --bad: #ff9a9a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1b16; --card: #15271f; --ink: #e6efe8; --muted: #93a79c; --line: #263f35; --soft: #1c3329;
+  --btn-bg: #d6ef7a; --btn-fg: #14301f; --btn-off: #3b574b; --lime: #d6ef7a; --lime-ink: #14301f;
+  --field: #112019; --good-bg: #1d4a30; --good-fg: #b9ecc9; --new-bg: #4a3b0c; --new-fg: #f4dd8c; --bad: #ff9a9a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mark {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--btn-bg); color: var(--lime);
+  display: grid; place-items: center; font: 800 24px/1 var(--font-display); flex: none;
+}
+:root[data-theme="dark"] .mark { color: var(--btn-fg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mark { color: var(--btn-fg); } }
+.brand b { font: 700 1.25rem/1.1 var(--font-display); letter-spacing: -0.01em; }
+.privacy { font-size: 0.78rem; line-height: 1.3; color: var(--muted); text-align: right; max-width: 15ch; }
+.eyebrow { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin: 14px 0 0; }
+h1 {
+  font: 800 clamp(2.5rem, 11vw, 3.75rem)/0.98 var(--font-display); letter-spacing: -0.035em;
+  margin: 0; text-wrap: balance;
+}
+.lede { font-size: 1.12rem; color: var(--muted); margin: 0; max-width: 34em; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 28px;
+  padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.card h2 { display: flex; align-items: center; gap: 12px; margin: 0; font: 700 1.3rem/1.2 var(--font-display); letter-spacing: -0.01em; }
+.num {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--soft); color: var(--ink);
+  display: grid; place-items: center; font: 700 1rem/1 var(--font-display); flex: none;
+}
+.card h2 .count { margin-left: auto; font: 600 0.95rem var(--font-body); background: var(--soft); border-radius: 999px; padding: 6px 14px; font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); margin: 0; font-size: 0.98rem; }
+.drop {
+  border: 2px dashed var(--line); border-radius: 22px; padding: 22px 16px; background: var(--field);
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; min-width: 0;
+}
+.drop .status { margin: 0; color: var(--muted); font-size: 0.95rem; overflow-wrap: anywhere; }
+.drop .status strong { color: var(--ink); }
+.btn {
+  appearance: none; border: 0; cursor: pointer; font: 700 1.05rem/1.2 var(--font-body);
+  border-radius: 18px; padding: 16px 22px; background: var(--btn-bg); color: var(--btn-fg);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+}
+.btn.soft { background: var(--soft); color: var(--ink); }
+.btn.wide { width: 100%; }
+.btn:disabled { background: var(--btn-off); color: #fff; opacity: 0.75; cursor: not-allowed; }
+.btn.soft:disabled { background: var(--soft); color: var(--muted); }
+.btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .xbtn:focus-visible, label.btn:focus-within {
+  outline: 3px solid var(--lime); outline-offset: 2px; box-shadow: 0 0 0 5px var(--btn-bg);
+}
+input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-weight: 700; font-size: 0.95rem; }
+.control {
+  width: 100%; font: 500 1.15rem/1.3 var(--font-body); color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--line); border-radius: 18px; padding: 16px 18px;
+}
+.control::placeholder { color: var(--muted); opacity: 0.7; }
+.control.price { padding-right: 56px; font-variant-numeric: tabular-nums; }
+.price-wrap { position: relative; }
+.price-wrap span { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+textarea.control { min-height: 84px; resize: vertical; }
+select.control { font-size: 1rem; padding: 12px 14px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 380px) { .row { grid-template-columns: 1fr; } }
+.shot { width: 100%; max-height: 300px; object-fit: contain; border-radius: 16px; background: var(--soft); display: block; }
+.note { font-size: 0.9rem; color: var(--muted); margin: 0; }
+.note.err { color: var(--bad); font-weight: 600; }
+.sheetmap { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { font-size: 0.8rem; font-weight: 600; background: var(--soft); border-radius: 999px; padding: 4px 10px; }
+.chip.miss { background: var(--new-bg); color: var(--new-fg); }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.list li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: start;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.list .no { font: 700 1.05rem var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+.list .nm { grid-column: 1; color: var(--muted); font-size: 0.93rem; overflow-wrap: anywhere; }
+.list .pr { grid-column: 2; grid-row: 1; font: 700 1.05rem var(--font-body); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.list .meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.badge { font-size: 0.78rem; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: var(--soft); color: var(--muted); }
+.badge.update { background: var(--good-bg); color: var(--good-fg); }
+.badge.new { background: var(--new-bg); color: var(--new-fg); }
+.was { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.xbtn { margin-left: auto; appearance: none; border: 0; background: none; color: var(--muted); font: 600 0.88rem var(--font-body); padding: 6px 4px; cursor: pointer; text-decoration: underline; }
+.empty { text-align: center; color: var(--muted); padding: 26px 8px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0; }
+.actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+@media (max-width: 380px) { .actions { grid-template-columns: 1fr; } }
+.foot { font-size: 0.88rem; color: var(--muted); margin: 0; }
+.toast {
+  position: sticky; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); align-self: center;
+  background: var(--btn-bg); color: var(--btn-fg); font-weight: 600; font-size: 0.95rem;
+  padding: 12px 18px; border-radius: 999px; max-width: 100%; text-align: center;
+}
+@media (prefers-reduced-motion: no-preference) { .btn { transition: transform .08s ease; } .btn:active:not(:disabled) { transform: scale(0.98); } }
+
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); color-scheme: light; }
+body { margin: 0; }
+.cam { position: relative; width: 100%; aspect-ratio: 3 / 4; max-height: 70vh; border-radius: 20px; overflow: hidden; background: #0b1511; }
+.cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cam .frame { position: absolute; left: 6%; right: 6%; top: 24%; bottom: 24%; border: 3px solid #d6ef7a; border-radius: 16px; box-shadow: 0 0 0 999px rgba(8,18,13,.45); pointer-events: none; }
+.cam .live { position: absolute; left: 10px; right: 10px; bottom: 10px; background: rgba(8,18,13,.78); color: #eaf5c0; border-radius: 12px; padding: 8px 12px; font: 600 .9rem var(--font-body); font-variant-numeric: tabular-nums; }
+.cam .off { position: absolute; inset: 0; display: grid; place-items: center; color: #93a79c; font-weight: 600; padding: 20px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><div class="mark" aria-hidden="true">C</div><b>Tag to sheet</b></div>
+    <p class="privacy">Camera and workbook stay on this device</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <p class="eyebrow">Costco price capture</p>
+    <h1>Scan a tag.<br>Update your sheet.</h1>
+    <p class="lede">Photograph shelf tags one at a time, check each result, then write the Costco prices into your comparison workbook. Retailer prices are never touched.</p>
+  </div>
+
+  <section class="card" aria-labelledby="h-wb">
+    <h2 id="h-wb"><span class="num">1</span>Choose your workbook</h2>
+    <p class="hint">Upload the Excel file you want to update. Your current retailer prices will be kept.</p>
+    <div class="drop">
+      <label class="btn soft" for="wbfile">Choose Excel workbook</label>
+      <input id="wbfile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <p class="status" id="wbstatus">No workbook selected</p>
+      <div class="sheetmap" id="sheetmap" hidden></div>
+      <div class="field" id="sheetpick" hidden style="width:100%;text-align:left">
+        <label for="sheetsel">Sheet to update</label>
+        <select id="sheetsel" class="control"></select>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-scan">
+    <h2 id="h-scan"><span class="num">2</span>Scan tags as you walk</h2>
+    <p class="hint">Start the live camera, center one whole tag inside the green frame, and hold steady. Review each item number, product name and shelf price, then add it to the batch.</p>
+    <div class="drop">
+      <div class="cam" id="cam" hidden>
+        <video id="video" playsinline muted autoplay></video>
+        <div class="frame"></div>
+        <div class="live" id="live" aria-live="polite">Looking for a tag…</div>
+      </div>
+      <button class="btn wide" id="camstart" type="button">Start live camera</button>
+      <button class="btn soft" id="scanbtn" type="button" disabled>Scan this tag</button>
+      <p class="note" id="readnote" aria-live="polite">Fill most of the green frame with one tag. Hold steady and avoid glare. Frames are read on this device and are not uploaded.</p>
+    </div>
+
+    <div class="field">
+      <label for="f-item">Item number</label>
+      <input id="f-item" class="control" inputmode="numeric" autocomplete="off" placeholder="e.g. 475309">
+    </div>
+    <div class="field">
+      <label for="f-price">Shelf price</label>
+      <div class="price-wrap"><input id="f-price" class="control price" inputmode="decimal" autocomplete="off" placeholder="e.g. 45 or 1.899"><span>kr</span></div>
+    </div>
+    <div class="field">
+      <label for="f-name">Product name</label>
+      <textarea id="f-name" class="control" placeholder="Name as printed on the tag"></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn" id="addbtn" type="button" disabled>Add to batch</button>
+      <button class="btn soft" id="clearbtn" type="button">Clear fields</button>
+    </div>
+    <p class="note" id="addnote" aria-live="polite">Confirm the item number and the large shelf price before adding. Unit prices such as “per 100 gram” are not the shelf price.</p>
+  </section>
+
+  <section class="card" aria-labelledby="h-rev">
+    <h2 id="h-rev"><span class="num">3</span>Review and update <span class="count" id="count">0 items</span></h2>
+    <p class="hint">Item numbers already in the workbook get a new Costco price. New item numbers are added as new rows.</p>
+    <p class="empty" id="empty">Your scanned items will appear here.</p>
+    <ul class="list" id="list" hidden></ul>
+    <div class="actions">
+      <button class="btn" id="exportbtn" type="button" disabled>Update workbook and download</button>
+      <button class="btn soft" id="resetbtn" type="button" disabled>Clear batch</button>
+    </div>
+    <p class="foot">The download is a revised copy of your workbook. Values and formulas are kept; some cell formatting may be simplified, so try a copy first.</p>
+  </section>
+
+  <p class="foot" style="text-align:center">Check the item number and shelf price before adding each scan.</p>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var st = { buf: null, fileName: '', wb: null, sheet: '', rows: [], r0: 0, c0: 0, map: null, index: new Map(), batch: [] };
+  
+
+  /* ---------- helpers ---------- */
+  function parsePrice(s) {
+    s = String(s == null ? '' : s).replace(/kr|sek|:-/ig, '').replace(/[\s ]/g, '');
+    if (!s) return NaN;
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');
+    else s = s.replace(',', '.');
+    var n = parseFloat(s);
+    return isFinite(n) && n > 0 ? n : NaN;
+  }
+  function fmt(n) {
+    return n.toLocaleString('sv-SE', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }) + ' kr';
+  }
+  function key(v) {
+    if (v == null) return '';
+    var s = String(v).trim().replace(/\.0+$/, '');
+    return /^\d+$/.test(s) ? s : s.toLowerCase();
+  }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 3500);
+  }
+  function save() { try { localStorage.setItem('tts.batch', JSON.stringify(st.batch)); } catch (e) {} }
+  function load() { try { var v = JSON.parse(localStorage.getItem('tts.batch') || '[]'); if (Array.isArray(v)) st.batch = v.filter(function (x) { return x && x.item && x.price > 0; }); } catch (e) {} }
+
+  /* ---------- workbook ---------- */
+  function readSheet(name) {
+    st.sheet = name;
+    var ws = st.wb.Sheets[name];
+    var ref = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } };
+    st.r0 = ref.s.r; st.c0 = ref.s.c;
+    st.rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true });
+    var h = -1, ci = -1, i, j, r;
+    for (i = 0; i < Math.min(st.rows.length, 20) && h < 0; i++) {
+      r = st.rows[i] || [];
+      for (j = 0; j < r.length; j++) {
+        if (typeof r[j] === 'string' && /item|artikel|art\.?\s*nr|varunummer|sku/i.test(r[j])) { h = i; ci = j; break; }
+      }
+    }
+    var found = h >= 0;
+    if (!found) { h = 0; ci = 0; }
+    var head = st.rows[h] || [], m = { head: h, item: ci, product: -1, costco: -1, updated: -1, found: found };
+    head.forEach(function (c, k) {
+      if (typeof c !== 'string') return;
+      if (/costco/i.test(c)) { if (/updat|date|datum/i.test(c)) m.updated = k; else if (m.costco < 0) m.costco = k; }
+      else if (m.product < 0 && k !== ci && /product|produkt|name|namn|beskriv|descr/i.test(c)) m.product = k;
+    });
+    st.map = m;
+    st.index = new Map();
+    for (i = h + 1; i < st.rows.length; i++) {
+      var k2 = key((st.rows[i] || [])[ci]);
+      if (k2 && !st.index.has(k2)) st.index.set(k2, i);
+    }
+    var rowsN = st.index.size;
+    $('wbstatus').innerHTML = '<strong></strong>';
+    $('wbstatus').firstChild.textContent = st.fileName;
+    var map = $('sheetmap'); map.hidden = false; map.innerHTML = '';
+    function chip(txt, miss) { var s = document.createElement('span'); s.className = 'chip' + (miss ? ' miss' : ''); s.textContent = txt; map.appendChild(s); }
+    chip(rowsN + ' items');
+    chip(found ? 'Item column found' : 'No item column named; using column A', !found);
+    chip(m.costco >= 0 ? 'Costco column found' : 'Costco column will be added', m.costco < 0);
+    render();
+  }
+  $('wbfile').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    $('wbstatus').textContent = 'Reading ' + f.name + '…';
+    f.arrayBuffer().then(function (buf) {
+      try {
+        st.buf = buf; st.fileName = f.name;
+        st.wb = XLSX.read(buf, { type: 'array' });
+        var sel = $('sheetsel'); sel.innerHTML = '';
+        st.wb.SheetNames.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+        $('sheetpick').hidden = st.wb.SheetNames.length < 2;
+        readSheet(st.wb.SheetNames[0]);
+      } catch (err) {
+        st.wb = null; st.buf = null;
+        $('wbstatus').textContent = 'That file could not be read. Choose an .xlsx workbook.';
+        $('sheetmap').hidden = true; render();
+      }
+    });
+  });
+  $('sheetsel').addEventListener('change', function (e) { readSheet(e.target.value); });
+
+  /* ---------- live camera and on-device OCR ---------- */
+  var cam = { stream: null, worker: null, workerP: null, timer: null, busy: false, last: '', blockKey: '' };
+  function setNote(msg, err) { var n = $('readnote'); n.className = 'note' + (err ? ' err' : ''); n.textContent = msg; }
+  function getWorker() {
+    if (cam.workerP) return cam.workerP;
+    cam.workerP = Tesseract.createWorker('eng').then(function (w) {
+      return w.setParameters({ tessedit_pageseg_mode: '11', preserve_interword_spaces: '1' }).then(function () { cam.worker = w; return w; });
+    });
+    return cam.workerP;
+  }
+  function grab() {
+    var v = $('video'); if (!v.videoWidth) return null;
+    var sx = v.videoWidth * 0.06, sw = v.videoWidth * 0.88;
+    var sy = v.videoHeight * 0.24, sh = v.videoHeight * 0.52;
+    /* the preview crops the video to fill the box, so map the green frame onto the visible area */
+    var box = $('cam').getBoundingClientRect(), s = Math.max(box.width / v.videoWidth, box.height / v.videoHeight);
+    var visW = box.width / s, visH = box.height / s, offX = (v.videoWidth - visW) / 2, offY = (v.videoHeight - visH) / 2;
+    sx = offX + visW * 0.06; sw = visW * 0.88; sy = offY + visH * 0.24; sh = visH * 0.52;
+    var k = Math.min(1.6, 1400 / sw), c = document.createElement('canvas');
+    c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+    c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    return c;
+  }
+  function tagText(data, itemTok, price) {
+    var skip = {};
+    if (itemTok) skip[itemTok.t] = 1;
+    if (price) skip[price.t] = 1;
+    var out = [];
+    (data.lines || []).forEach(function (l) {
+      var ws = (l.words || []).filter(function (w) {
+        if (w.confidence < 30) return false;
+        if (/^[\d.,]+$/.test(w.text) && skip[w.text]) return false;
+        return true;
+      });
+      var text = ws.map(function (w) { return w.text; }).join(' ').replace(/\s+/g, ' ').trim();
+      if ((text.match(/[A-Za-z0-9ÅÄÖåäö]/g) || []).length < 3) return;
+      out.push({ text: text, h: l.bbox.y1 - l.bbox.y0, y: l.bbox.y0, x: l.bbox.x0 });
+    });
+    if (!out.length) return '';
+    var hs = out.map(function (o) { return o.h; }).sort(function (a, b) { return a - b; }), med = hs[Math.floor(hs.length / 2)];
+    out = out.filter(function (o) { return o.h >= med * 0.45; });
+    out.sort(function (a, b) { return a.y - b.y || a.x - b.x; });
+    return out.map(function (o) { return o.text; }).join(' ');
+  }
+  function parseTag(data) {
+    var words = (data.words || []).filter(function (w) { return w.text && w.confidence > 35; });
+    var nums = [], items = [];
+    words.forEach(function (w) {
+      var t = w.text.replace(/[^\d.,]/g, ''); if (!t) return;
+      var h = w.bbox.y1 - w.bbox.y0, pos = w.bbox.y0 * 10000 + w.bbox.x0;
+      if (/^\d{5,7}$/.test(t)) items.push({ t: t, h: h, pos: pos });
+      if (/^\d{1,3}([.,]\d{3})*([.,]\d{1,2})?$/.test(t) && !isNaN(parsePrice(t))) nums.push({ t: t, h: h });
+    });
+    nums.sort(function (a, b) { return b.h - a.h; });
+    var price = nums.length ? nums[0] : null;
+    items.sort(function (a, b) { return a.pos - b.pos; });
+    var itemTok = null;
+    for (var i = 0; i < items.length; i++) { if (!price || items[i].t !== price.t || items[i].h < price.h) { itemTok = items[i]; break; } }
+    var model = '';
+    (data.lines || []).some(function (l) {
+      var mm = /MODE[LI1]\s*(?:NO\.?|NR\.?|#)?\s*[:.\-]?\s*([A-Z0-9][A-Z0-9\-\/\.]{2,})/i.exec(l.text);
+      if (mm) { model = mm[1].replace(/[.\-\/]+$/, '').toUpperCase(); return true; }
+      return false;
+    });
+    var lines = (data.lines || []).map(function (l) { return l.text.replace(/\s+/g, ' ').trim(); }).filter(function (t) {
+      var letters = (t.match(/[A-Za-zÅÄÖåäö]/g) || []).length;
+      return letters >= 6 && letters / t.length > 0.6 && !/\bper\b|kr\/|jmf|\/kg|\/st|MODE[LI1]/i.test(t);
+    });
+    return { item: itemTok ? itemTok.t : '', price: price ? price.t : '', name: tagText(data, itemTok, price) };
+  }
+  function showLive(r) {
+    $('live').textContent = (r.item || r.price) ? ((r.item || '—') + '  ·  ' + (r.price ? fmt(parsePrice(r.price)) : '—')) : 'Looking for a tag…';
+  }
+  function fill(r, force) {
+    if (r.item) $('f-item').value = r.item;
+    if (r.price) $('f-price').value = r.price;
+    if (r.name && (force || !$('f-name').value)) $('f-name').value = r.name;
+    validate();
+  }
+  function cycle(manual) {
+    if (cam.busy || !cam.stream) return Promise.resolve();
+    var c = grab(); if (!c) return Promise.resolve();
+    cam.busy = true;
+    return getWorker().then(function (w) { return w.recognize(c); }).then(function (res) {
+      var r = parseTag(res.data); showLive(r);
+      var sig = r.item && r.price ? r.item + '|' + r.price : '';
+      if (!r.item) cam.blockKey = '';
+      if (manual) {
+        if (r.item || r.price) { fill(r, true); setNote(r.item && r.price ? 'Check the item number and shelf price against the tag, then add it.' : 'Some fields could not be read. Fill them in from the tag.', !(r.item && r.price)); }
+        else setNote('No tag found. Center one whole tag in the green frame and try again.', true);
+      } else if (sig && sig === cam.last && r.item !== cam.blockKey) {
+        if ($('f-item').value !== r.item || $('f-price').value !== r.price) { fill(r, true); if (navigator.vibrate) navigator.vibrate(60); setNote('Tag read. Check the item number and shelf price, then add it.'); }
+      }
+      cam.last = sig;
+    }).catch(function () { setNote('Reading failed. Check your connection for the first load, or type the details.', true); })
+      .then(function () { cam.busy = false; });
+  }
+  function loop() { cam.timer = setTimeout(function () { cycle(false).then(function () { if (cam.stream) loop(); }); }, 450); }
+  function stopCam() {
+    clearTimeout(cam.timer);
+    if (cam.stream) cam.stream.getTracks().forEach(function (t) { t.stop(); });
+    cam.stream = null; $('video').srcObject = null; $('cam').hidden = true;
+    $('camstart').textContent = 'Start live camera'; $('scanbtn').disabled = true;
+  }
+  $('camstart').addEventListener('click', function () {
+    if (cam.stream) { stopCam(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setNote('The camera needs this page to be opened over https in a modern browser.', true); return; }
+    setNote('Starting the camera…');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }).then(function (stream) {
+      cam.stream = stream; var v = $('video'); v.srcObject = stream; $('cam').hidden = false;
+      return v.play().catch(function () {});
+    }).then(function () {
+      if (!cam.stream) return;
+      $('camstart').textContent = 'Stop camera'; $('scanbtn').disabled = false;
+      setNote('Fill most of the green frame with one tag. Hold steady and avoid glare.');
+      $('live').textContent = 'Loading the reader…';
+      getWorker().then(function () { $('live').textContent = 'Looking for a tag…'; loop(); }).catch(function () { setNote('The reader could not load. Check your internet connection and try again.', true); });
+    }).catch(function (e) {
+      setNote(e && e.name === 'NotAllowedError' ? 'Camera access was blocked. Allow the camera for this site in your browser settings, then try again.' : 'The camera could not start on this device.', true);
+    });
+  });
+  $('scanbtn').addEventListener('click', function () { cam.last = ''; cycle(true); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden && cam.stream) stopCam(); });
+
+  /* ---------- fields and batch ---------- */
+  function validate() {
+    var okItem = /^\d{4,}$/.test($('f-item').value.trim()), okPrice = !isNaN(parsePrice($('f-price').value));
+    $('addbtn').disabled = !(okItem && okPrice);
+  }
+  ['f-item', 'f-price', 'f-name'].forEach(function (id) { $(id).addEventListener('input', validate); });
+  function clearFields() {
+    ['f-item', 'f-price', 'f-name'].forEach(function (id) { $(id).value = ''; });
+    validate();
+  }
+  $('clearbtn').addEventListener('click', clearFields);
+  $('addbtn').addEventListener('click', function () {
+    var item = $('f-item').value.trim(), price = parsePrice($('f-price').value), name = $('f-name').value.trim();
+    var dup = st.batch.findIndex(function (b) { return b.item === item; });
+    var entry = { item: item, name: name, price: price };
+    if (dup >= 0) { st.batch[dup] = entry; toast('Replaced the earlier scan of ' + item); } else { st.batch.push(entry); toast('Added ' + item); }
+    cam.blockKey = item; cam.last = ''; save(); clearFields(); render();
+  });
+  $('resetbtn').addEventListener('click', function () {
+    if ($('resetbtn').dataset.armed === '1') { st.batch = []; save(); render(); toast('Batch cleared'); $('resetbtn').dataset.armed = ''; $('resetbtn').textContent = 'Clear batch'; return; }
+    $('resetbtn').dataset.armed = '1'; $('resetbtn').textContent = 'Tap again to clear';
+    setTimeout(function () { $('resetbtn').dataset.armed = ''; $('resetbtn').textContent = 'Clear batch'; }, 3000);
+  });
+
+  function render() {
+    var list = $('list'); list.innerHTML = '';
+    $('count').textContent = st.batch.length + (st.batch.length === 1 ? ' item' : ' items');
+    $('empty').hidden = st.batch.length > 0; list.hidden = st.batch.length === 0;
+    st.batch.forEach(function (b, i) {
+      var li = document.createElement('li');
+      var no = document.createElement('span'); no.className = 'no'; no.textContent = b.item;
+      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = fmt(b.price);
+      var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = b.name || 'No product name';
+      var meta = document.createElement('div'); meta.className = 'meta';
+      var badge = document.createElement('span'); badge.className = 'badge';
+      if (st.wb) {
+        var idx = st.index.get(key(b.item));
+        if (idx != null) {
+          badge.className += ' update'; badge.textContent = 'Update existing row';
+          var cur = st.map.costco >= 0 ? (st.rows[idx] || [])[st.map.costco] : null;
+          meta.appendChild(badge);
+          if (cur != null && cur !== '') { var w = document.createElement('span'); w.className = 'was'; w.textContent = 'was ' + (typeof cur === 'number' ? fmt(cur) : cur); meta.appendChild(w); }
+        } else { badge.className += ' new'; badge.textContent = 'New row'; meta.appendChild(badge); }
+      } else { badge.textContent = 'Choose a workbook'; meta.appendChild(badge); }
+      var x = document.createElement('button'); x.type = 'button'; x.className = 'xbtn'; x.textContent = 'Remove';
+      x.setAttribute('aria-label', 'Remove ' + b.item);
+      x.addEventListener('click', function () { st.batch.splice(i, 1); save(); render(); });
+      meta.appendChild(x);
+      li.appendChild(no); li.appendChild(pr); li.appendChild(nm); li.appendChild(meta);
+      list.appendChild(li);
+    });
+    $('exportbtn').disabled = !(st.wb && st.batch.length);
+    $('resetbtn').disabled = !st.batch.length;
+  }
+
+  /* ---------- export ---------- */
+  function saveFile(name, data) {
+    var type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    var blob = new Blob([data], { type: type });
+    try {
+      var file = new File([blob], name, { type: type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: name });
+    } catch (e) {}
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    return Promise.resolve();
+  }
+  $('exportbtn').addEventListener('click', function () {
+    var wb = XLSX.read(st.buf, { type: 'array' }), ws = wb.Sheets[st.sheet], m = st.map;
+    var ref = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } };
+    var r0 = st.r0, c0 = st.c0, E = XLSX.utils.encode_cell, hr = r0 + m.head;
+    var costC, updC;
+    if (m.costco >= 0) costC = c0 + m.costco; else { costC = ++ref.e.c; ws[E({ r: hr, c: costC })] = { t: 's', v: 'Costco price' }; }
+    if (m.updated >= 0) updC = c0 + m.updated; else { updC = ++ref.e.c; ws[E({ r: hr, c: updC })] = { t: 's', v: 'Costco updated' }; }
+    var sampleItem = (st.rows[m.head + 1] || [])[m.item], numericItems = typeof sampleItem === 'number';
+    var added = 0, updated = 0, stamp = today();
+    st.batch.forEach(function (b) {
+      var idx = st.index.get(key(b.item)), r;
+      if (idx != null) { r = r0 + idx; updated++; }
+      else {
+        r = ++ref.e.r; added++;
+        ws[E({ r: r, c: c0 + m.item })] = numericItems ? { t: 'n', v: Number(b.item) } : { t: 's', v: b.item };
+        if (m.product >= 0 && b.name) ws[E({ r: r, c: c0 + m.product })] = { t: 's', v: b.name };
+      }
+      ws[E({ r: r, c: costC })] = { t: 'n', v: b.price, z: '#,##0.00' };
+      ws[E({ r: r, c: updC })] = { t: 's', v: stamp };
+    });
+    ws['!ref'] = XLSX.utils.encode_range(ref);
+    var out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    var name = st.fileName.replace(/\.xlsx$/i, '') + '-costco.xlsx';
+    saveFile(name, out).then(function () {
+      toast(updated + ' updated, ' + added + ' added');
+    }).catch(function (err) {
+      if (err && err.name === 'AbortError') toast('Download cancelled');
+      else toast('The file could not be saved. Try again.');
+    });
+  });
+
+  load(); render(); validate();
+})();
+</script>
+</body>
+</html>
